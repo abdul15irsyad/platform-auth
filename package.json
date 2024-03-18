@@ -1,0 +1,9 @@
+{
+  "name": "platform-auth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start:dev": "npx concurrently \"cd backend && yarn start:dev\" \"cd client && yarn dev\""
+  }
+}
