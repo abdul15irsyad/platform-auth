@@ -7,16 +7,18 @@ import {
   Post,
   Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from './user/user.service';
 import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { isEmpty } from 'class-validator';
-import { compareSync } from 'bcrypt';
 import { hashPassword } from './auth.util';
 import { ACCESS_TOKEN_EXPIRED, REFRESH_TOKEN_EXPIRED } from './auth.config';
 import { Request } from 'express';
-import { LoginDto, RegisterDto } from './dto';
+import { RegisterDto } from './dto';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from './user/user.entity';
 
 export enum JWTType {
   ACCESS_TOKEN = 'access-token',
@@ -36,23 +38,12 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
+  @UseGuards(AuthGuard('local'))
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginInput: LoginDto) {
+  async login(@Req() req: Request & { user: User }) {
     try {
-      const { email, password } = loginInput;
-      const authUser = await this.userService.findOne({
-        select: {
-          id: true,
-          password: true,
-        },
-        where: { email: email },
-      });
-      if (isEmpty(authUser) || !compareSync(password, authUser?.password)) {
-        // prevent response time vulnerability
-        if (isEmpty(authUser)) hashPassword(password);
-        throw new UnauthorizedException('Email or password is incorrect');
-      }
+      const authUser = req.user;
       // create json web token
       const accessToken = this.jwtService.sign(
         { id: authUser.id, type: JWTType.ACCESS_TOKEN },
@@ -70,12 +61,10 @@ export class AuthController {
       return {
         accessToken: {
           token: accessToken,
-          // expiresIn: ACCESS_TOKEN_EXPIRED,
           grantType: GrantType.PASSWORD,
         },
         refreshToken: {
           token: refreshToken,
-          // expiresIn: REFRESH_TOKEN_EXPIRED,
         },
       };
     } catch (error) {

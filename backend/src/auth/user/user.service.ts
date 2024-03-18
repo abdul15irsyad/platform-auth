@@ -21,6 +21,13 @@ export class UserService extends BaseService<User> {
     super(userRepo);
   }
 
+  async findOneWithPassword(options: FindOptionsWhere<User>): Promise<User> {
+    return this.userRepo.findOne({
+      where: options,
+      select: { id: true, password: true },
+    });
+  }
+
   async findWithPagination({
     page,
     limit,
