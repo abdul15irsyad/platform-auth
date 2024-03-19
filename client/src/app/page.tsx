@@ -33,8 +33,8 @@ export default function Home() {
       ).json();
     },
     onSuccess: (response) => {
-      setForm({ email: "", password: "" });
-      console.log(response);
+      if (response.accessToken) setForm({ email: "", password: "" });
+      // TODO: redirect to protected route
     },
   });
   return (

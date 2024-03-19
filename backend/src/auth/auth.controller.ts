@@ -17,8 +17,8 @@ import { hashPassword } from './auth.util';
 import { ACCESS_TOKEN_EXPIRED, REFRESH_TOKEN_EXPIRED } from './auth.config';
 import { Request } from 'express';
 import { RegisterDto } from './dto';
-import { AuthGuard } from '@nestjs/passport';
 import { User } from './user/user.entity';
+import { LocalAuthGuard } from './guard/local.guard';
 
 export enum JWTType {
   ACCESS_TOKEN = 'access-token',
@@ -38,7 +38,7 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Req() req: Request & { user: User }) {
@@ -68,7 +68,7 @@ export class AuthController {
         },
       };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      throw new InternalServerErrorException(error.message ?? error);
     }
   }
 
