@@ -10,6 +10,9 @@ export class User extends BaseEntity {
   @Index({ unique: true, where: 'deleted_at is null' })
   email: string;
 
+  @Column('timestamptz', { name: 'email_verified_at', nullable: true })
+  emailVerifiedAt?: Date;
+
   @Column('varchar', { nullable: true, select: false })
   password?: string;
 }

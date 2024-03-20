@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
@@ -13,12 +14,14 @@ import { AuthService } from './auth.service';
 import { UserService } from './user/user.service';
 import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { isEmpty } from 'class-validator';
-import { hashPassword } from './auth.util';
+import { createJWTResponse, hashPassword } from './auth.util';
 import { ACCESS_TOKEN_EXPIRED, REFRESH_TOKEN_EXPIRED } from './auth.config';
 import { Request } from 'express';
 import { RegisterDto } from './dto';
 import { User } from './user/user.entity';
 import { LocalAuthGuard } from './guard/local.guard';
+import { GoogleOauthGuard } from './guard/google-oauth.guard';
+import { v4 as uuidv4 } from 'uuid';
 
 export enum JWTType {
   ACCESS_TOKEN = 'access-token',
@@ -45,31 +48,43 @@ export class AuthController {
     try {
       const authUser = req.user;
       // create json web token
-      const accessToken = this.jwtService.sign(
-        { id: authUser.id, type: JWTType.ACCESS_TOKEN },
-        {
-          expiresIn: ACCESS_TOKEN_EXPIRED,
-        },
-      );
-      const refreshToken = this.jwtService.sign(
-        { id: authUser.id, type: JWTType.REFRESH_TOKEN },
-        {
-          expiresIn: REFRESH_TOKEN_EXPIRED,
-        },
-      );
-
-      return {
-        accessToken: {
-          token: accessToken,
-          grantType: GrantType.PASSWORD,
-        },
-        refreshToken: {
-          token: refreshToken,
-        },
-      };
+      return createJWTResponse({ authUser, jwtService: this.jwtService });
     } catch (error) {
       throw new InternalServerErrorException(error.message ?? error);
     }
+  }
+
+  @UseGuards(GoogleOauthGuard)
+  @Get('google')
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async loginGoogle() {}
+
+  @UseGuards(GoogleOauthGuard)
+  @Get('google-redirect')
+  @HttpCode(HttpStatus.OK)
+  async loginGoogleRedirect(
+    @Req()
+    req: Request & {
+      user: {
+        provider: 'google';
+        providerId: string;
+        email: string;
+        name: string;
+        picture: string;
+      };
+    },
+  ) {
+    let authUser = await this.userService.findOneBy({ email: req.user.email });
+    if (!authUser)
+      authUser = await this.userService.save(uuidv4(), {
+        name: req.user.name,
+        email: req.user.email,
+      });
+    if (!authUser.emailVerifiedAt) {
+      await this.userService.save(authUser.id, { emailVerifiedAt: new Date() });
+    }
+    // create json web token
+    return createJWTResponse({ authUser, jwtService: this.jwtService });
   }
 
   @Post('refresh-token')
