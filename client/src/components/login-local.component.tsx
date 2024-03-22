@@ -1,11 +1,14 @@
 "use client";
 
-import { API_URL } from "@/app.config";
-import { useMutation } from "@tanstack/react-query";
+// import { API_URL } from "@/app.config";
+// import { useMutation } from "@tanstack/react-query";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const LoginLocal = () => {
+  const router = useRouter();
   const [form, setForm] = useState<LoginDto>({
     email: "",
     password: "",
@@ -16,37 +19,45 @@ const LoginLocal = () => {
     password: string;
   }
 
-  const mutation = useMutation<
-    {
-      accessToken: { token: string; grantType: string };
-      refreshToken: { token: string };
-    },
-    {},
-    LoginDto
-  >({
-    mutationKey: ["login"],
-    mutationFn: async (loginDto) => {
-      return (
-        await fetch(`${API_URL}/v1/auth/login`, {
-          method: "post",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(loginDto),
-        })
-      ).json();
-    },
-    onSuccess: (response) => {
-      if (response.accessToken) setForm({ email: "", password: "" });
-      // TODO: redirect to protected route
-    },
-  });
+  // const mutation = useMutation<
+  //   {
+  //     accessToken: { token: string; grantType: string };
+  //     refreshToken: { token: string };
+  //   },
+  //   {},
+  //   LoginDto
+  // >({
+  //   mutationKey: ["login"],
+  //   mutationFn: async (loginDto) => {
+  //     return (
+  //       await fetch(`${API_URL}/v1/auth/login`, {
+  //         method: "post",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify(loginDto),
+  //       })
+  //     ).json();
+  //   },
+  //   onSuccess: (response) => {
+  //     if (response.accessToken) setForm({ email: "", password: "" });
+  //     // TODO: redirect to protected route
+  //   },
+  // });
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    const signInResponse = await signIn("credentials", {
+      ...form,
+      redirect: false,
+    });
+    if (signInResponse?.ok) {
+      router.push("/");
+    } else {
+      console.log(signInResponse);
+    }
+  };
   return (
-    <form
-      className="space-y-3 md:space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        mutation.mutate(form);
-      }}
-    >
+    <form className="space-y-3 md:space-y-4" onSubmit={handleSubmit}>
       <div>
         <label
           htmlFor="email"

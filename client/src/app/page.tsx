@@ -1,9 +1,20 @@
-"use client";
+"use server";
 
-import { GoogleAuthButton } from "@/components/auth-button.component";
-import LoginLocal from "@/components/login-local.component";
+import LogoutButton from "@/components/logout-button.component";
+import { authConfig } from "@/configs/auth.config";
+import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 
-export default function Home() {
-  redirect("auth/login");
-}
+const Root = async () => {
+  const session = await getServerSession(authConfig);
+  if (!session) redirect("auth/login");
+
+  return (
+    <div>
+      <h1>Home</h1>
+      <LogoutButton />
+    </div>
+  );
+};
+
+export default Root;
