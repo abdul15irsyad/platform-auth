@@ -4,6 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start:dev": "npx concurrently \"cd backend && yarn start:dev\" \"cd client && yarn dev\""
+    "start:dev": "npx concurrently \"cd backend && yarn start:dev\" \"cd client && yarn dev\"",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "husky": "^9.0.11"
   }
 }
