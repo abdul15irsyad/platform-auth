@@ -1,6 +1,9 @@
 "use client";
 
-import { GoogleAuthButton } from "@/components/auth-button.component";
+import {
+  GithubAuthButton,
+  GoogleAuthButton,
+} from "@/components/auth-button.component";
 import AuthContainer from "@/components/auth-container.component";
 import LoginLocal from "@/components/login-local.component";
 
@@ -15,6 +18,7 @@ export default function Login() {
         <h5 className="dark:text-white font-bold text-sm">OR</h5>
       </div>
       <GoogleAuthButton />
+      <GithubAuthButton />
     </AuthContainer>
   );
 }
