@@ -1,6 +1,9 @@
+"use client";
+
 import { API_URL } from "@/app.config";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const SignUpLocal = () => {
@@ -10,6 +13,7 @@ const SignUpLocal = () => {
     password: "",
     confirmPassword: "",
   });
+  const router = useRouter();
 
   interface SignUpDto {
     name: string;
@@ -19,35 +23,47 @@ const SignUpLocal = () => {
   }
 
   const mutation = useMutation<
+    { id: string; name: string; email: string; emailVerifiedAt?: string },
     {
       status: number;
+      message: string;
     },
-    {},
     SignUpDto
   >({
     mutationKey: ["sign-up"],
     mutationFn: async (signUpDto) => {
-      return (
-        await fetch(`${API_URL}/v1/auth/register`, {
-          method: "post",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(signUpDto),
-        })
-      ).json();
+      const response = await fetch(`${API_URL}/v1/auth/register`, {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(signUpDto),
+      });
+      const data = await response.json();
+      if (response.status !== 201) {
+        throw data;
+      }
+      return data;
     },
-    onSuccess: (response) => {
-      console.log(response);
-      // TODO: redirect to protected route
+    onSuccess: () => {
+      router.push("/auth/login");
+      setForm({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
     },
   });
+
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    try {
+      e.preventDefault();
+      mutation.mutate(form);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
-    <form
-      className="space-y-3 md:space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        mutation.mutate(form);
-      }}
-    >
+    <form className="space-y-3 md:space-y-4" onSubmit={handleSubmit}>
       <div>
         <label
           htmlFor="name"

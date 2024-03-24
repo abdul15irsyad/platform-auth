@@ -49,9 +49,11 @@ export const authConfig: NextAuthOptions = {
       if (user) {
         token.accessToken = (user as any).accessToken;
       }
+      console.log({ token, user });
       return token;
     },
     async session({ session, token }) {
+      console.log({ session, token });
       // console.log("session");
       session.user = token;
       return session;
