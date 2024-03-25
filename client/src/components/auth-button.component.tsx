@@ -1,11 +1,18 @@
-import Image from "next/image";
+'use client';
 
-import googleLogo from "/public/image/google.png";
-import githubLogo from "/public/image/github.png";
+import Image from 'next/image';
+
+import googleLogo from '/public/image/google.png';
+import githubLogo from '/public/image/github.png';
+import { MouseEventHandler } from 'react';
+import { signIn } from 'next-auth/react';
+import { NEXT_PUBLIC_GOOGLE_CALLBACK_URL } from '@/configs/auth.config';
 
 const GoogleAuthButton = () => {
-  const handleClick = () => {
-    console.log("google auth clicked");
+  const handleClick: MouseEventHandler<HTMLButtonElement> = async (e) => {
+    const signInResponse = await signIn('google', {
+      callbackUrl: NEXT_PUBLIC_GOOGLE_CALLBACK_URL,
+    });
   };
   return (
     <button
@@ -21,7 +28,7 @@ const GoogleAuthButton = () => {
 
 const GithubAuthButton = () => {
   const handleClick = () => {
-    console.log("github auth clicked");
+    console.log('github auth clicked');
   };
   return (
     <button

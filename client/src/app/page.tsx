@@ -1,13 +1,13 @@
-"use server";
+'use server';
 
-import LogoutButton from "@/components/logout-button.component";
-import { authConfig } from "@/configs/auth.config";
-import { getServerSession } from "next-auth/next";
-import { redirect } from "next/navigation";
+import LogoutButton from '@/components/logout-button.component';
+import { authConfig } from '@/configs/auth.config';
+import { getServerSession } from 'next-auth/next';
+import { redirect } from 'next/navigation';
 
 const Root = async () => {
   const session = await getServerSession(authConfig);
-  if (!session) redirect("auth/login");
+  if (!session) redirect('auth/login');
 
   return (
     <div>

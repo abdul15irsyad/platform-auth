@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
 // import { API_URL } from "@/app.config";
 // import { useMutation } from "@tanstack/react-query";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { signIn } from 'next-auth/react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const LoginLocal = () => {
   const router = useRouter();
   const [form, setForm] = useState<LoginDto>({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
 
   interface LoginDto {
@@ -43,17 +43,17 @@ const LoginLocal = () => {
   //   },
   // });
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
-    const signInResponse = await signIn("credentials", {
+    const signInResponse = await signIn('credentials', {
       ...form,
       redirect: false,
     });
     if (signInResponse?.ok) {
-      router.push("/");
+      router.push('/');
     } else {
-      console.log(signInResponse);
+      console.error({ signInResponse });
     }
   };
   return (
@@ -107,7 +107,7 @@ const LoginLocal = () => {
         Login
       </button>
       <p className="text-sm text-center font-light text-gray-500 dark:text-gray-400">
-        Don{"'"}t have an account yet?{" "}
+        Don{"'"}t have an account yet?{' '}
         <Link
           href="/auth/sign-up"
           className="font-medium text-green-600 hover:underline dark:text-green-500"
